@@ -1,0 +1,21 @@
+
+Pesos/ResNet152.h5
+*.zip
+Pesos/DenseNet121.h5
+Pesos/DenseNet201.h5
+Pesos/EfficientNetB0.h5
+Pesos/InceptionResNetV2.h5
+Pesos/InceptionV3.h5
+Pesos/MobileNet.h5
+Pesos/ResNet101.h5
+Pesos/ResNet50V2.h5
+Pesos/VGG16.h5
+Pesos/VGG19.h5
+Pesos/Xception.h5
+*.tif
+*.tif
+Datos INP EMD/MESSIDOR/EMD/20051020_43808_0100_PP.tif
+*.tif
+*.tif
+*.jpg
+*.jpg
