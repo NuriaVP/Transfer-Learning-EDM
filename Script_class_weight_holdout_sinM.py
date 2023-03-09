@@ -113,22 +113,17 @@ def cargar_datos(path1, path2, escala, color = color):
 # In[ ]:
 
 
-def transferLearning_classweight_holdout(inp,proc,red):
+def transferLearning_classweight_holdout(proc,red):
     
     #CARGA DE DATOS
     
     escala = dic_escala[red]
-    
-    if inp==False:
-        if proc==False:
-            ruta_general='Datos base EMD'
-        else:
-            ruta_general='Datos base preprocesados EMD'
+
+    if proc==False:
+        ruta_general='Datos base EMD'
     else:
-        if proc==False:
-            ruta_general='Datos base INP EMD'
-        else:
-            ruta_general='Datos preprocesados base INP EMD'
+        ruta_general='Datos base preprocesados EMD'
+
     
     dataset_iphone = cargar_datos(ruta_general+'/iPhone/EMD', ruta_general+'/iPhone/NO EMD', escala)
     dataset_samsung = cargar_datos(ruta_general+'/Samsung/EMD', ruta_general+'/Samsung/NO EMD', escala)
@@ -138,7 +133,7 @@ def transferLearning_classweight_holdout(inp,proc,red):
     print('TEST: iPHONE')
     print('___________________________________________________________________________________')
     print(f'La red empleada es {red} por lo que las imágenes sean reescalado a {escala}x{escala}')
-    print(f'Las imágenes están es {color}, están inpaintadas {inp}, están preprocesadas {inp}')
+    print(f'Las imágenes están es {color} y están preprocesadas {proc}')
     print('___________________________________________________________________________________')
 
     
@@ -219,7 +214,7 @@ def transferLearning_classweight_holdout(inp,proc,red):
     print('TEST: Samsung')
     print('___________________________________________________________________________________')
     print(f'La red empleada es {red} por lo que las imágenes sean reescalado a {escala}x{escala}')
-    print(f'Las imágenes están es {color}, están inpaintadas {inp}, están preprocesadas {inp}')
+    print(f'Las imágenes están es {color} y están preprocesadas {inp}')
     print('___________________________________________________________________________________')
     
     train_ds = np.concatenate((dataset_oct[0],dataset_iphone[0]))
@@ -301,7 +296,7 @@ def transferLearning_classweight_holdout(inp,proc,red):
 
 
 print('___________________________________________________________________________________')
-print('SIN INPAINT SIN PREPROCESAMIENTO')
+print('SIN PREPROCESAMIENTO')
 print('___________________________________________________________________________________')
 
 
@@ -309,29 +304,14 @@ print('_________________________________________________________________________
 
 
 for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
-    transferLearning_classweight_holdout(False,False,e)
+    transferLearning_classweight_holdout(False,e)
 
 
 # In[ ]:
 
 
 print('___________________________________________________________________________________')
-print('SIN INPAINT CON PREPROCESAMIENTO')
-print('___________________________________________________________________________________')
-
-
-# In[ ]:
-
-
-for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
-    transferLearning_classweight_holdout(False,True,e)
-
-
-# In[ ]:
-
-
-print('___________________________________________________________________________________')
-print('CON INPAINT SIN PREPROCESAMIENTO')
+print('CON PREPROCESAMIENTO')
 print('___________________________________________________________________________________')
 
 
@@ -339,20 +319,5 @@ print('_________________________________________________________________________
 
 
 for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
-    transferLearning_classweight_holdout(True,False,e)
-
-
-# In[ ]:
-
-
-print('___________________________________________________________________________________')
-print('CON INPAINT CON PREPROCESAMIENTO')
-print('___________________________________________________________________________________')
-
-
-# In[ ]:
-
-
-for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
-    transferLearning_classweight_holdout(True,True,e)
+    transferLearning_classweight_holdout(True,e)
 

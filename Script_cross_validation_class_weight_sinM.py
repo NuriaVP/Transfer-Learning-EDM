@@ -63,12 +63,10 @@ from tensorflow.keras.applications.efficientnet import preprocess_input as prepr
 
 
 def direct(inp,proc):
-    if (inp==False and proc==False):
-        directorio = 'Datos cross validation base EMD'
-    elif (inp==True and proc==False):
-        directorio = 'Datos no proc Cross Validation EMD'
-    elif (inp==True and proc==True):
-        directorio = 'Datos Cross Validation EMD'
+    if (proc==False):
+        directorio = 'Datos cross validation base sM EMD'
+    else:
+        directorio = 'Datos Cross Validation sM EMD'
 
 
 # In[ ]:
@@ -335,11 +333,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA VGG16 Con inp / Sin proc
-inp=True
+#PRUEBA VGG16 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,VGG16)
 '''
 
@@ -348,11 +345,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA VGG16 Con inp / Con proc
-inp=True
+#PRUEBA VGG16 Con proc
 proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,VGG16)
 '''
 
@@ -361,11 +357,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA VGG19 Sin inp / Sin proc
-inp=False
+#PRUEBA VGG19 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,VGG19)
 '''
 
@@ -374,11 +369,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA VGG19 Con inp / Sin proc
-inp=True
-proc=False
+#PRUEBA VGG19 Con proc
+proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,VGG19)
 '''
 
@@ -387,24 +381,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA VGG19 Con inp / Con proc
-inp=True
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,VGG19)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA Xception Sin inp / Sin proc
-inp=False
+#PRUEBA Xception Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,Xception)
 '''
 
@@ -413,11 +393,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA Xception Con inp / Sin proc
-inp=True
-proc=False
+#PRUEBA Xception Con proc
+proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,Xception)
 '''
 
@@ -426,24 +405,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA Xception Con inp / Con proc
-inp=True
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,Xception)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet50V2 Sin inp / Sin proc
-inp=False
+#PRUEBA ResNet50V2 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,ResNet50V2)
 '''
 
@@ -452,11 +417,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA ResNet50V2 Con inp / Sin proc
-inp=True
-proc=False
+#PRUEBA ResNet50V2 Con proc
+proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,ResNet50V2)
 '''
 
@@ -465,24 +429,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA ResNet50V2 Con inp / Con proc
-inp=True
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,ResNet50V2)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet101 Sin inp / Sin proc
-inp=False
+#PRUEBA ResNet101 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,ResNet101)
 '''
 
@@ -491,11 +441,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA ResNet101 Con inp / Sin proc
-inp=True
-proc=False
+#PRUEBA ResNet101 Con proc
+proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,ResNet101)
 '''
 
@@ -504,24 +453,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA ResNet101 Con inp / Con proc
-inp=True
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,ResNet101)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet152 Sin inp / Sin proc
-inp=False
+#PRUEBA ResNet152 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,ResNet152)
 '''
 
@@ -530,11 +465,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA ResNet152 Con inp / Sin proc
-inp=True
-proc=False
+#PRUEBA ResNet152 Con proc
+proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,ResNet152)
 '''
 
@@ -543,24 +477,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA ResNet152 Con inp / Con proc
-inp=True
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,ResNet152)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA InceptionV3 Sin inp / Sin proc
-inp=False
+#PRUEBA InceptionV3 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,InceptionV3)
 '''
 
@@ -569,11 +489,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA InceptionV3 Con inp / Sin proc
-inp=True
-proc=False
+#PRUEBA InceptionV3 Con proc
+proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,InceptionV3)
 '''
 
@@ -582,24 +501,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA InceptionV3 Con inp / Con proc
-inp=True
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,InceptionV3)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA InceptionResNetV2 Sin inp / Sin proc
-inp=False
+#PRUEBA InceptionResNetV2 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,InceptionResNetV2)
 '''
 
@@ -608,11 +513,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA InceptionResNetV2 Con inp / Sin proc
-inp=True
-proc=False
+#PRUEBA InceptionResNetV2 Con proc
+proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,InceptionResNetV2)
 '''
 
@@ -621,24 +525,22 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA InceptionResNetV2 Con inp / Con proc
-inp=True
+#PRUEBA MobileNet Sin proc
+proc=False
+for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
+    directorio = direct(proc)
+    transfer_learning(directorio,K_test,MobileNet)
+'''
+
+
+# In[ ]:
+
+
+'''
+#PRUEBA MobileNet Con proc
 proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,InceptionResNetV2)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA MobileNet Sin inp / Sin proc
-inp=False
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,MobileNet)
 '''
 
@@ -647,11 +549,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA MobileNet Con inp / Sin proc
-inp=True
+#PRUEBA DenseNet121 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,MobileNet)
 '''
 
@@ -660,11 +561,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA MobileNet Con inp / Con proc
-inp=True
+#PRUEBA DenseNet121 Con proc
 proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,MobileNet)
 '''
 
@@ -673,50 +573,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA DenseNet121 Sin inp / Sin proc
-inp=False
+#PRUEBA DenseNet201 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,MobileNet)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet121 Con inp / Sin proc
-inp=True
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,MobileNet)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet121 Con inp / Con proc
-inp=True
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,MobileNet)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet201 Sin inp / Sin proc
-inp=False
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,DenseNet201)
 '''
 
@@ -725,24 +585,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA DenseNet201 Con inp / Sin proc
-inp=True
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,DenseNet201)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet201 Con inp / Con proc
-inp=True
+#PRUEBA DenseNet201 Con proc
 proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,DenseNet201)
 '''
 
@@ -751,11 +597,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA EfficientNetB0 Sin inp / Sin proc
-inp=False
+#PRUEBA EfficientNetB0 Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,EfficientNetB0)
 '''
 
@@ -764,24 +609,10 @@ for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
 
 
 '''
-#PRUEBA EfficientNetB0 Con inp / Sin proc
-inp=True
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,EfficientNetB0)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA EfficientNetB0 Con inp / Con proc
-inp=True
+#PRUEBA EfficientNetB0 Con proc
 proc=True
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
+    directorio = direct(proc)
     transfer_learning(directorio,K_test,EfficientNetB0)
 '''
 
