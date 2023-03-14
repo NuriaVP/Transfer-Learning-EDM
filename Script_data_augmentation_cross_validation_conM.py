@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[1]:
 
 
 import os
@@ -59,7 +59,7 @@ from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.applications.efficientnet import preprocess_input as preprocess_EfficientNetB0
 
 
-# In[13]:
+# In[2]:
 
 
 def direct(proc):
@@ -69,7 +69,7 @@ def direct(proc):
         directorio = 'Datos Cross Validation EMD'
 
 
-# In[4]:
+# In[3]:
 
 
 color = 'rgb' 
@@ -88,7 +88,7 @@ dic_preprocesado = {VGG16:preprocess_VGG16,
                 EfficientNetB0:preprocess_EfficientNetB0}
 
 
-# In[8]:
+# In[4]:
 
 
 def combine_gen(gens):
@@ -107,13 +107,14 @@ def combine_gen(gens):
         yield(tuple((images,labels)))
 
 
-# In[6]:
+# In[ ]:
 
 
-def num(directorio,K_test):
+def num(directorio,K_test,K_val):
     total = 0
     lista_K = ['K1','K2','K3','K4','K5']
     lista_K.remove(K_test)
+    lista_K.remove(K_val)
     for K in lista_K:
             for origen in ['MESSIDOR','iPhone','OCT','Samsung']:
                 for grado in ['EMD', 'NO EMD']:
@@ -124,29 +125,36 @@ def num(directorio,K_test):
     return num_train,num_val
 
 
-# In[7]:
+# In[ ]:
 
 
-def generador_train(directorio,K,origen,grado,escala):
+def generador_train(modelo,directorio,K,origen,grado,escala):
+    train_datagen = ImageDataGenerator(
+        preprocessing_function = preprocesado[modelo],
+        horizontal_flip=True,
+        vertical_flip=True,
+        zca_whitening=True,
+        zca_epsilon=1e-06
+        preprocessing_function = dic_preprocesado[modelo]
+    )
     generator = train_datagen.flow_from_directory(
         directory = directorio + '/' + K + '/' + origen + '/' + grado,
         target_size = (escala,escala),
         color_mode = color,
         class_mode='categorical',
         batch_size = 1,
-        seed = 42,
-        subset='training'
-    )
-    
+        seed = 42
+    )  
     return generator
 
 
-# In[9]:
+# In[ ]:
 
 
-def train_gen(directorio,K_test,escala=224):
+def train_gen(directorio,K_test,K_val,escala=224):
     lista_K = ['K1','K2','K3','K4','K5']
     lista_K.remove(K_test)
+    lista_K.remove(K_val)
     generadores = []
     for K in lista_K:
         for origen in ['iPhone','OCT','Samsung']:
@@ -157,51 +165,42 @@ def train_gen(directorio,K_test,escala=224):
     return generador_combinado
 
 
-# In[11]:
+# In[ ]:
 
 
-def generador_val(directorio,K,origen,grado,escala):
+def generador_val(modelo,directorio,K_val,escala):
+    val_datagen = ImageDataGenerator(
+        preprocessing_function = dic_preprocesado[modelo]
+    )
     generator = train_datagen.flow_from_directory(
-        directory = directorio + '/' + K + '/' + origen + '/' + grado,
+        directory = directorio + '/' + K_val,
         target_size = (escala,escala),
         color_mode = color,
         class_mode='categorical',
         batch_size = 1,#vamos a equilibrar proporciones, 1/80 ya que tenemos 4 cajas de train * 4 orígenes * 5 grados
-        seed = 42,
-        subset='validation'
+        seed = 42
     )
     
     return generator
 
 
-# In[12]:
-
-
-def val_gen(directorio,K_test,escala=224):
-    lista_K = ['K1','K2','K3','K4','K5']
-    lista_K.remove(K_test)
-    generadores = []
-    for K in lista_K:
-        for origen in ['iPhone','OCT','Samsung']:
-            for grado in ['EMD', 'NO EMD']:
-                generadores.append(generador_val(directorio,K,origen,grado,escala))
-                
-    generador_combinado = combine_gen(generadores)
-    return generador_combinado
-
-
-# In[10]:
+# In[ ]:
 
 
 def transfer_learning(directorio,K_test,red):
-    
-    train_datagen = ImageDataGenerator(
-        validation_split = 0.2,
-        preprocessing_function = dic_preprocesado[red]
-    )
-    #creamos los 3 generadores, de train, test y validation
-    train_generator = train_gen(directorio,K_test,escala = dic_escala[red])
-    val_generator = val_gen(directorio,K_test,escala = dic_escala[red])
+    if (K_test == 'K1'):
+        K_val = 'K5'
+    elif (K_test == 'K2'):
+        K_val = 'K1'
+    elif (K_test == 'K3'):
+        K_val = 'K2'
+    elif (K_test == 'K4'):
+        K_val = 'K3'
+    elif (K_test == 'K5'):
+        K_val = 'K4'
+   
+    train_generator = train_gen(red,directorio,K_test,K_val,escala = dic_escala[red])
+    val_generator = generador_val(red,directorio,K_val,escala = dic_escala[red])
     
     #para el generador de tipo test debemos definir antes un nuevo ImageDataGenerator
     test_datagen = ImageDataGenerator(preprocessing_function=dic_preprocesado[red])
@@ -228,7 +227,6 @@ def transfer_learning(directorio,K_test,red):
         seed = 42
     )
     
-    
     #Definimos el modelo base de transfer-learning
     base_model = red(weights=None, include_top=False, input_shape=(dic_escala[red],dic_escala[red],3))
     base_model.load_weights('Pesos/' + str(red).split(' ')[1] + '.h5')
@@ -253,7 +251,7 @@ def transfer_learning(directorio,K_test,red):
     #Entrenar el modelo
     model.compile(
         optimizer='adam',
-        loss='cateogircal_crossentropy',
+        loss='categorical_crossentropy',
         metrics=['accuracy'],
     )
     
@@ -264,10 +262,10 @@ def transfer_learning(directorio,K_test,red):
         x = train_generator,
         batch_size=batch,
         epochs=200,
-        steps_per_epoch = math.ceil(num(directorio,K_test)[0] / batch),
+        steps_per_epoch = math.ceil(num(directorio,K_test,K_val) / batch),
         callbacks=[es],
         validation_data = val_generator,
-        validation_steps = math.ceil(num(directorio,K_test)[1] / batch)
+        validation_steps = math.ceil(num(directorio,K_test,K_val) / batch)
     )
     
     #Métricas de evaluación
@@ -325,7 +323,7 @@ def transfer_learning(directorio,K_test,red):
 modelo = sys.argv[1]
 
 
-# In[14]:
+# In[ ]:
 
 
 #PRUEBA Sin proc

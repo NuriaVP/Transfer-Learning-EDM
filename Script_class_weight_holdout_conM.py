@@ -301,7 +301,7 @@ print('_________________________________________________________________________
 
 
 for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
-    transferLearning_classweight_holdout(False,False,e)
+    transferLearning_classweight_holdout(False,e)
 
 
 # In[ ]:
@@ -316,5 +316,5 @@ print('_________________________________________________________________________
 
 
 for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
-    transferLearning_classweight_holdout(True,True,e)
+    transferLearning_classweight_holdout(True,e)
 

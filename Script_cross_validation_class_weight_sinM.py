@@ -62,7 +62,7 @@ from tensorflow.keras.applications.efficientnet import preprocess_input as prepr
 # In[ ]:
 
 
-def direct(inp,proc):
+def direct(proc):
     if (proc==False):
         directorio = 'Datos cross validation base sM EMD'
     else:
@@ -128,16 +128,12 @@ def num(directorio,K_test):
 
 
 def generador_train(directorio,K,origen,grado,escala):
-    train_datagen = ImageDataGenerator(
-        validation_split = 0.2,
-        preprocessing_function = preprocesado[modelo]
-    )
     generator = train_datagen.flow_from_directory(
         directory = directorio + '/' + K + '/' + origen + '/' + grado,
         target_size = (escala,escala),
         color_mode = color,
         class_mode='categorical',
-        batch_size = batch,
+        batch_size = 1,
         seed = 42,
         subset='training'
     )
@@ -170,7 +166,7 @@ def generador_val(directorio,K,origen,grado,escala):
         target_size = (escala,escala),
         color_mode = color,
         class_mode='categorical',
-        batch_size = batch,#vamos a equilibrar proporciones, 1/80 ya que tenemos 4 cajas de train * 4 orígenes * 5 grados
+        batch_size = 1,#vamos a equilibrar proporciones, 1/80 ya que tenemos 4 cajas de train * 4 orígenes * 5 grados
         seed = 42,
         subset='validation'
     )
@@ -198,38 +194,43 @@ def val_gen(directorio,K_test,escala=224):
 
 
 def transfer_learning(directorio,K_test,red):
+    
+    train_datagen = ImageDataGenerator(
+        validation_split = 0.2,
+        preprocessing_function = dic_preprocesado[red]
+    )
     #creamos los 3 generadores, de train, test y validation
-    train_generator = train_gen(directorio,K_test,escala = escala[red])
-    val_generator = val_gen(directorio,K_test,escala = escala[red])
+    train_generator = train_gen(directorio,K_test,escala = dic_escala[red])
+    val_generator = val_gen(directorio,K_test,escala = dic_escala[red])
     
     #para el generador de tipo test debemos definir antes un nuevo ImageDataGenerator
-    test_datagen = ImageDataGenerator(preprocessing_function=preprocesado[red])
+    test_datagen = ImageDataGenerator(preprocessing_function=dic_preprocesado[red])
     
     #definimos un generador para Samsung, que coja únicamente las imágenes de Samsung de la caja de test
     test_Samsung = test_datagen.flow_from_directory(
         directory = directorio + '/' + K_test + '/Samsung/',
-        target_size = (escala[red],escala[red]),
+        target_size = (dic_escala[red],dic_escala[red]),
         color_mode = color,
         shuffle = False,
         class_mode='categorical',
-        batch_size=batch,
+        batch_size=1,
         seed = 42
     )
     
     #y lo mismo para iPhone, que solo coja las imágenes de iPhone de la caja de test
     test_iPhone = test_datagen.flow_from_directory(
         directory = directorio + '/' + K_test + '/iPhone/',
-        target_size = (escala[red],escala[red]),
+        target_size = (dic_escala[red],dic_escala[red]),
         color_mode = color,
         shuffle = False,
         class_mode='categorical',
-        batch_size=batch,
+        batch_size=1,
         seed = 42
     )
     
     
     #Definimos el modelo base de transfer-learning
-    base_model = red(weights=None, include_top=False, input_shape=(escala[red],escala[red],3))
+    base_model = red(weights=None, include_top=False, input_shape=(dic_escala[red],dic_escala[red],3))
     base_model.load_weights('Pesos/' + str(red).split(' ')[1] + '.h5')
     base_model.trainable = False ## Not trainable weights
     
@@ -263,10 +264,10 @@ def transfer_learning(directorio,K_test,red):
         x = train_generator,
         batch_size=batch,
         epochs=200,
-        steps_per_epoch = math.ceil(num(directorio,K_test[0]) / batch),
+        steps_per_epoch = math.ceil(num(directorio,K_test)[0] / batch),
         callbacks=[es],
         validation_data = val_generator,
-        validation_steps = math.ceil(num(directorio,K_test[1]) / batch)
+        validation_steps = math.ceil(num(directorio,K_test)[1] / batch)
     )
     
     #Métricas de evaluación
@@ -321,298 +322,25 @@ def transfer_learning(directorio,K_test,red):
 # In[ ]:
 
 
-#PRUEBA VGG16 Sin inp / Sin proc
-inp=False
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(inp,proc)
-    transfer_learning(directorio,K_test,VGG16)
+modelo = sys.argv[1]
 
 
 # In[ ]:
 
 
-'''
-#PRUEBA VGG16 Sin proc
+#PRUEBA Sin proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
     directorio = direct(proc)
-    transfer_learning(directorio,K_test,VGG16)
-'''
+    transfer_learning(directorio,K_test,modelo)
 
 
 # In[ ]:
 
 
-'''
-#PRUEBA VGG16 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,VGG16)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA VGG19 Sin proc
+#PRUEBA Con proc
 proc=False
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
     directorio = direct(proc)
-    transfer_learning(directorio,K_test,VGG19)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA VGG19 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,VGG19)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA Xception Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,Xception)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA Xception Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,Xception)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet50V2 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,ResNet50V2)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet50V2 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,ResNet50V2)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet101 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,ResNet101)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet101 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,ResNet101)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet152 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,ResNet152)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA ResNet152 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,ResNet152)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA InceptionV3 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,InceptionV3)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA InceptionV3 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,InceptionV3)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA InceptionResNetV2 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,InceptionResNetV2)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA InceptionResNetV2 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,InceptionResNetV2)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA MobileNet Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,MobileNet)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA MobileNet Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,MobileNet)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet121 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,MobileNet)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet121 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,MobileNet)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet201 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,DenseNet201)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA DenseNet201 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,DenseNet201)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA EfficientNetB0 Sin proc
-proc=False
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,EfficientNetB0)
-'''
-
-
-# In[ ]:
-
-
-'''
-#PRUEBA EfficientNetB0 Con proc
-proc=True
-for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
-    directorio = direct(proc)
-    transfer_learning(directorio,K_test,EfficientNetB0)
-'''
+    transfer_learning(directorio,K_test,modelo)
 
