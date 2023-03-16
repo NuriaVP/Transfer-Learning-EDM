@@ -75,7 +75,8 @@ dic_preprocesado = {VGG16:preprocess_VGG16,
                 MobileNet:preprocess_MobileNet,
                 DenseNet121:preprocess_DenseNet121,
                 DenseNet201:preprocess_DenseNet201,
-                EfficientNetB0:preprocess_EfficientNetB0}
+                EfficientNetB0:preprocess_EfficientNetB0,
+		InceptionV3:preprocess_InceptionV3}
 
 
 # In[ ]:
@@ -130,7 +131,7 @@ def transferLearning_classweight_holdout(proc,red):
     print('TEST: iPHONE')
     print('___________________________________________________________________________________')
     print(f'La red empleada es {red} por lo que las imágenes sean reescalado a {escala}x{escala}')
-    print(f'Las imágenes están es {color} y están preprocesadas {inp}')
+    print(f'Las imágenes están es {color} y están preprocesadas {proc}')
     print('___________________________________________________________________________________')
 
     
@@ -151,7 +152,8 @@ def transferLearning_classweight_holdout(proc,red):
     
     #IMPORTACIÓN MODELO TRANSFER LEARNING
     
-    base_model = red(weights="imagenet", include_top=False, input_shape=train_ds[0].shape)
+    base_model = red(weights=None, include_top=False, input_shape=(dic_escala[red],dic_escala[red],3))
+    base_model.load_weights('Pesos/' + str(red).split(' ')[1] + '.h5')
     base_model.trainable = False ## Not trainable weights
     
     #FINE TUNNING
@@ -211,7 +213,7 @@ def transferLearning_classweight_holdout(proc,red):
     print('TEST: Samsung')
     print('___________________________________________________________________________________')
     print(f'La red empleada es {red} por lo que las imágenes sean reescalado a {escala}x{escala}')
-    print(f'Las imágenes están es {color} y están inpaintadas {inp}, están preprocesadas {inp}')
+    print(f'Las imágenes están es {color} y están preprocesadas {proc}')
     print('___________________________________________________________________________________')
     
     train_ds = np.concatenate((dataset_oct[0],dataset_iphone[0]))
@@ -230,7 +232,8 @@ def transferLearning_classweight_holdout(proc,red):
     
     #IMPORTACIÓN MODELO TRANSFER LEARNING
     
-    base_model = red(weights="imagenet", include_top=False, input_shape=train_ds[0].shape)
+    base_model = red(weights=None, include_top=False, input_shape=(dic_escala[red],dic_escala[red],3))
+    base_model.load_weights('Pesos/' + str(red).split(' ')[1] + '.h5')
     base_model.trainable = False ## Not trainable weights
     
     #FINE TUNNING
@@ -306,7 +309,7 @@ for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3,
 
 # In[ ]:
 
-
+'''
 print('___________________________________________________________________________________')
 print('CON PREPROCESAMIENTO')
 print('___________________________________________________________________________________')
@@ -318,3 +321,4 @@ print('_________________________________________________________________________
 for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
     transferLearning_classweight_holdout(True,e)
 
+'''
