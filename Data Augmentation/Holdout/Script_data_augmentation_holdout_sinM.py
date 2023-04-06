@@ -59,24 +59,11 @@ from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.applications.efficientnet import preprocess_input as preprocess_EfficientNetB0
 
 
-# In[ ]:
-
 
 modelo = getattr(sys.modules[__name__], sys.argv[1])
 
 
-# In[ ]:
-
-
-def direct(proc):
-    if (proc==False):
-        ruta_general='Datos holdout base EMD'
-    else:
-        ruta_general='Datos holdout base preprocesados EMD'
-
-
-# In[2]:
-
+directorio='Datos holdout base preprocesados EMD'
 
 color = 'rgb' 
 batch = 16
@@ -91,7 +78,8 @@ dic_preprocesado = {VGG16:preprocess_VGG16,
                 MobileNet:preprocess_MobileNet,
                 DenseNet121:preprocess_DenseNet121,
                 DenseNet201:preprocess_DenseNet201,
-                EfficientNetB0:preprocess_EfficientNetB0}
+                EfficientNetB0:preprocess_EfficientNetB0,
+		InceptionV3:preprocess_InceptionV3}
 
 
 # In[ ]:
@@ -112,23 +100,25 @@ def combine_gen(gens):
 
         yield(tuple((images,labels)))
 
-
-# In[ ]:
-
-
 def generador_train(directorio,origen,grado,escala):
-    generator = train_datagen.flow_from_directory(
-        directory = directorio + '/' + train + '/' + origen + '/' + grado,
-        target_size = (escala,escala),
+   train_datagen = ImageDataGenerator(
+	preprocessing_function = dic_preprocesado[modelo],
+        horizontal_flip=True,
+        vertical_flip=True,
+        zca_whitening=True,
+        zca_epsilon=1e-06
+    )
+
+   generator = train_datagen.flow_from_directory(
+   	directory = directorio + '/train/' + origen + '/' + grado,
+   	target_size = (escala,escala),
         color_mode = color,
         class_mode='categorical',
         batch_size = 1,
         seed = 42
     )
-    return generator
+   return generator
 
-
-# In[ ]:
 
 
 def train_gen(directorio,escala=224):
@@ -139,13 +129,13 @@ def train_gen(directorio,escala=224):
     generador_combinado = combine_gen(generadores)
     return generador_combinado
 
-
-# In[ ]:
-
-
 def generador_val(directorio,origen,grado,escala):
-    generator = train_datagen.flow_from_directory(
-        directory = directorio + '/' + val + '/' + origen + '/' + grado,
+    val_datagen = ImageDataGenerator(
+	preprocessing_function = dic_preprocesado[modelo],
+    )
+
+    generator = val_datagen.flow_from_directory(
+        directory = directorio + '/val/' + origen + '/' + grado,
         target_size = (escala,escala),
         color_mode = color,
         class_mode='categorical',
@@ -172,21 +162,9 @@ def val_gen(directorio,escala=224):
 
 
 def transfer_learning(directorio,red):
-    
-    train_datagen = ImageDataGenerator(
-        preprocessing_function = dic_preprocesado[red],
-        horizontal_flip=True,
-        vertical_flip=True,
-        zca_whitening=True,
-        zca_epsilon=1e-06
-    )
-    
+        
     train_generator = train_gen(directorio,escala = dic_escala[red])
-    
-    train_datagen = ImageDataGenerator(
-        preprocessing_function = dic_preprocesado[red],
-    )
-    
+        
     val_generator = val_gen(directorio,escala = dic_escala[red])
     
     test_datagen = ImageDataGenerator(
@@ -194,7 +172,7 @@ def transfer_learning(directorio,red):
     )
     
     test_Samsung = test_datagen.flow_from_directory(
-        directory = directorio + '/' + test + '/Samsung/',
+        directory = directorio + '/test/Samsung/',
         target_size = (dic_escala[red],dic_escala[red]),
         color_mode = color,
         shuffle = False,
@@ -204,7 +182,7 @@ def transfer_learning(directorio,red):
     )
     
     test_iPhone = test_datagen.flow_from_directory(
-        directory = directorio + '/' + test + '/iPhone/',
+        directory = directorio + '/test/iPhone/',
         target_size = (dic_escala[red],dic_escala[red]),
         color_mode = color,
         shuffle = False,
@@ -214,7 +192,7 @@ def transfer_learning(directorio,red):
     )
     
     #Definimos el modelo base de transfer-learning
-    base_model = red(weights=None, include_top=False, input_shape=(escala[red],escala[red],3))
+    base_model = red(weights=None, include_top=False, input_shape=(dic_escala[red],dic_escala[red],3))
     base_model.load_weights('Pesos/' + str(red).split(' ')[1] + '.h5')
     base_model.trainable = False ## Not trainable weights
     
@@ -237,7 +215,7 @@ def transfer_learning(directorio,red):
     #Entrenar el modelo
     model.compile(
         optimizer='adam',
-        loss='cateogrical_crossentropy',
+        loss='categorical_crossentropy',
         metrics=['accuracy'],
     )
     
@@ -247,6 +225,7 @@ def transfer_learning(directorio,red):
     history = model.fit(
         x = train_generator,
         batch_size=batch,
+	steps_per_epoch=12,
         epochs=200,
         callbacks=[es],
         validation_data = val_generator
@@ -302,18 +281,6 @@ def transfer_learning(directorio,red):
     print(f"Valor de 'AUC' en test con Samsung: {auc_roc_samsung}\n")
 
 
-# In[ ]:
-
-
-proc=False
-directorio = direct(proc)
 transfer_learning(directorio,modelo)
 
-
-# In[ ]:
-
-
-proc=True
-directorio = direct(proc)
-transfer_learning(directorio,modelo)
 

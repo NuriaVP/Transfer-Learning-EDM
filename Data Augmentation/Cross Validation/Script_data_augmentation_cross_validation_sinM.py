@@ -63,7 +63,7 @@ from tensorflow.keras.applications.efficientnet import preprocess_input as prepr
 
 modelo = getattr(sys.modules[__name__], sys.argv[1])
 
-proc = True
+proc = False
 if (proc==False):
     directorio = 'Datos cross validation sM base EMD'
 else:
@@ -320,7 +320,12 @@ def transfer_learning(directorio,K_test,red):
     auc_roc_samsung = roc_auc_score(y_test_samsung, y_pred_samsung, multi_class = 'ovo')
     print(f"Valor de 'AUC' en test con Samsung: {auc_roc_samsung}\n")
 
+'''
 for K_test in ['K1', 'K2', 'K3', 'K4', 'K5']:
     transfer_learning(directorio,K_test,modelo)
+'''
+
+transfer_learning(directorio,'K1',modelo)
+
 
 
