@@ -3,6 +3,10 @@
 '''
 El siguiente script está diseñado para ejecutar redes de transfer learning empleando class_weight_compute() y técnicas de holdout sobre
 imágenes de OCT, iPhone y Samsung tanto preprocesadas como no preprocesadas.
+
+AUTOR: Nuria Velasco Pérez
+FECHA: Abril 2023
+TRABAJO FIN DE GRADO
 '''
 
 '''
@@ -140,10 +144,10 @@ def cargar_datos(path1, path2, escala, color = color):
         data.append(image)
         labels.append(0)
         
-    data = np.array(data)
-    labels = np.array(labels)
+    data = np.array(data) #Todos los arrays de las imágenes
+    labels = np.array(labels) #Todas las etiquetas de las imágenes
     
-    return data, labels
+    return data, labels 
 
 '''
 transferLearning_classweight_holdout(proc,red) entrena una red de transfer learning con los datos train correspondientes y evalúa su
@@ -206,9 +210,85 @@ TEST: iPhone
     Para tener el modelo completo unimos base_model con estas últimas cuatro capas con la función Sequential() del paquete models.
 
 6) Compensador de pesos:
-
     
+    Se trata de una técnica de equilibrado de pesos que nos servirá para abordar el problema del desquilibrio de nuestros datos, ya que         tenemos muchas más imágenes sin edema que con enfermedad. En Python podemos realizar la compensación con la función class_weight_compute     que posee el paquete class_weight de sklearn. Esta función devuelve el peso que ha de considerarse en cada una de las dos clases para       lograr el equilibrio esperado. Y posee tres atributos de entrada:
+    
+        - La opción 'balanced' que se utiliza para calcular los pesos de clase equilibrados automáticamente en función del número de                   observaciones en cada clase.
+        - Las clases que estamos considerando. En este caso, 0 y 1, aunque pedimos que las obtenga automáticamente aplicando la función
+          unique() de numpy sobre el conjunto de etiquetas. Unique() devuelve los valores únicos de la matriz indicada.
+        - Lista de etiquetas de los datos considerados para entrenar.
+    
+    Nosotros hemos guardado estos pesos como valores de un diccionario con dos datos que tiene como claves el nombre de las etiquetas a las     que se refiere cada peso. Este diccionario es el formato que necesitamos para emplear luego el parámetro "class_weight" en fit().
 
+7) Entrenamiento: 
+
+   En primer lugar, hemos de compilar el modelo neuronal creado para especificar su configuración. Para ello, utilizamos la función            compile() sobre nuestro "model", esta función acepta varios argumentos pero solo nos interesan los siguientes.
+   
+       - optimizer: algoritmo de optimización que se utiliza para minimizar la función de pérdida durante el entrenamiento. En este proyecto 
+         emplearemos siempre "adam" como optimizador porque adapta el tamaño del paso de actualización de los pesos en función de la                  magnitud de los gradientes para cada peso individual, lo que significa que cada peso tiene su propia tasa de aprendizaje                    adaptativa. Adam se trata de un algoritmo de optimización estocástica que combina los conceptos del descenso de gradiente                    estocástico (SGD) y el descenso de gradiente con momento.
+       - loss: la función de pérdida que se utiliza para evaluar la precisión del modelo durante el entrenamiento. En nuestro caso                    emplearemos "categorical_crossentropy" al estar trabajando con un problema de dos clases.
+       - metrics: lista de métricas que se utilizan para evaluar el rendimiento del modelo durante el entrenamiento. Pediremos que devuelva          la precisión con la que va entrenando, el resto de métricas de interés las calcularemos al realizar predicciones.
+   
+   Antes de comenzar con el entrenamiento vamos a incluir Early Stopping, una técnica utilizada para detener el entrenamiento de un modelo      antes de que se complete todo el número de épocas (iteraciones sobre el conjunto de datos) programado, con el objetivo de evitar el          sobreajuste y ahorrar tiempo de entrenamiento. Early Stopping detiene el entrenamiento del modelo cuando se alcanza un cierto punto de      saturación en el rendimiento, es decir, cuando el modelo deja de mejorar en el conjunto de validación. Los atributos de esta función son:
+   
+       - monitor: la métrica a monitorear durante el entrenamiento, en este caso "val_accuracy".
+       - mode: si la métrica debe ser maximizada o minimizada, en este caso "max".
+       - patience: el número de épocas que se esperará para ver una mejora en la métrica antes de detener el entrenamiento, en este caso 20.
+       - restore_best_weights: un indicador booleano que indica si se deben restaurar los pesos del modelo con los mejores valores durante            el entrenamiento.
+   
+   Y, a continuación, ya realizamos el entrenamiento planteado con la función fit(). Los atributos que nos interesan en este código son:
+   
+       - X_train = train_ds: datos para el entrenamiento.
+       - y_train = train_labels: etiquetas del entrenamiento.
+       - batch_size: número de muestras que se utilizarán en cada actualización de gradiente. El conjunto de datos completo se divide en              lotes de este tamaño y se procesa uno por uno.
+       - epochs: cantidad de épocas en las que se dividirá el entrenamiento.
+       - validation_split: sirve para separar una fracción de los datos de entrenamiento como conjunto de validación. En este caso hemos              reservado el 20%. Podría indicarse otro conjunto de datos diferente al de entrenamiento, pero en este caso no es lo que nos                  conviene.
+       - callbaks: son objetos que se utilizan durante el entrenamiento del modelo para realizar acciones específicas en momentos                    determinados, en este caso solo indicamos "es" por el EarlyStopping que hemos definido.
+       - class_weight: indicamos el diccionario de pesos personalizados para cada clase que hemos creado con el fin de solventar el                  desequilibrio entre clases.
+
+8) Métricas de evaluación:
+
+   Para obtener métricas que permitan ver el rendimiento de la red neuronal necesitamos hacer predicciones con el conjunto de datos de test.    Por eso utilizamos la función evaluate() para hacer la primera predicción indicando los datos de test definidos y las etiquetas reales      que luego compararemos con las predichas. Del resultado de evaluate obtenemos los datos de loss y accuracy, respectivamente.
+   
+       - loss: es una función que se utiliza para medir la discrepancia entre las predicciones de un modelo y las etiquetas verdaderas de            los datos de entrenamiento. Podríamos decir que mide cuán malo es el modelo en hacer predicciones en relación con las etiquetas              verdaderas. El objetivo del entrenamiento del modelo es minimizar la función de pérdida para mejorar la capacidad del modelo de              hacer predicciones precisas, así que buscamos valores muy bajos de loss.
+       - accuracy: es una de las métricas más relevantes para medir la calidad de un modelo de clasificación. La precisión es la proporción          de ejemplos de prueba para los cuales el modelo predice la etiqueta correcta.
+       
+   Sin embargo, cuando se hacer predicciones con un modelo ya entrenado, también existe otra función interesante predict(). Esta devuelve      una matriz de predicciones correspondientes a las entradas proporcionadas, lo que puede ser interesante para calcular métricas más          específicas. Nosotros vamos a convertir esta matriz en una lista unidimensional quedándonos con la clase que tiene una probabilidad más      grande para cada dato. A modo ilustrativo veamos a poner un ejemplo, la función predict para un dato cualquiera devolverá la probabilidad    relativa a cada clase [0.1 0.9], y nosotros queremos quedarnos con la clase a la que se refiere la probabilidad más grande, en este caso    1 por el 0.9. Esta última conversión la conseguimos haciendo un map() que se quede con la etiqueta de la predicción más grande.
+   
+   Con esta nueva lista de predicciones resultantes, vamos a calcular el resto de indicadores de interés:
+   
+       - Matriz de confusión: con la función confusion_matrix. Es una tabla que muestra la cantidad de verdaderos positivos, falsos                  positivos, verdaderos negativos y falsos negativos que se han producido para cada clase en un conjunto de datos.
+         
+         - Verdaderos positivos (TP): número de casos en que el modelo predijo correctamente la clase positiva (verdadero) cuando la clase              real era positiva.
+         - Falsos positivos (FP): número de casos en que el modelo predijo incorrectamente la clase positiva (falso) cuando la clase real              era negativa.
+         - Verdaderos negativos (TN): número de casos en que el modelo predijo correctamente la clase negativa (verdadero) cuando la clase              real era negativa.
+         - Falsos negativos (FN): número de casos en que el modelo predijo incorrectamente la clase negativa (falso) cuando la clase real              era positiva.
+       
+       - Valor F1: con la función f1_score. Es una medida común de la precisión de un modelo de clasificación binaria, que combina tanto la          precisión como la exhaustividad (recall) en una sola métrica.
+       - Auc Roc: con la función auc_roc_score. La curva ROC (característica de operación del receptor) es una representación gráfica de la          relación entre la tasa de verdaderos positivos y la tasa de falsos positivos a través de diferentes umbrales de decisión del                modelo. La métrica AUC-ROC es el área bajo esta curva ROC y varía entre 0 y 1. Un modelo con una AUC-ROC de 1 se considera                  perfecto, mientras que un modelo con una AUC-ROC de 0.5 se considera equivalente a una elección aleatoria.
+       
+TEST: Samsung
+
+2) División train y test:
+
+    En este caso, si vamos a testear con Samsung, entrenaremos con OCT y iPhone. Así que en 'train_ds' concatenamos los arrays de las           imágenes de OCT y iPhone. Y, en 'train_labels', concatenamos las listas de etiquetas de OCT y iPhone.
+    
+    Por otro lado, asignamos como 'test_ds' el array con el conjunto de imágenes de iPhone. Y como 'test_labels' la lista de etiquetas de
+    las imágenes de Samsung. 
+
+El resto de pasos son idénticos al test con iPhone
+
+3) Preprocesado de los datos
+
+4) Modelo base de transfer learning
+
+5) Fine tunning
+
+6) Compensador de pesos
+
+7) Entrenamiento
+
+8) Métricas de evaluación
 '''
 
 def transferLearning_classweight_holdout(proc,red):
@@ -217,9 +297,9 @@ def transferLearning_classweight_holdout(proc,red):
     escala = dic_escala[red]
 
     if proc==False:
-        ruta_general='Datos base EMD'
+        ruta_general='Datos base EMD' #Directorio de datos sin preprocesamiento
     else:
-        ruta_general='Datos base preprocesados EMD'
+        ruta_general='Datos base preprocesados EMD' #Directorio de datos con preprocesamiento
 
     
     dataset_iphone = cargar_datos(ruta_general+'/iPhone/EMD', ruta_general+'/iPhone/NO EMD', escala)
@@ -256,7 +336,7 @@ def transferLearning_classweight_holdout(proc,red):
     flatten_layer = layers.Flatten()
     dense_layer_1 = layers.Dense(50, activation='relu')
     dense_layer_2 = layers.Dense(20, activation='relu')
-    prediction_layer = layers.Dense(2, activation='softmax') #1 / sigmoid
+    prediction_layer = layers.Dense(2, activation='softmax') 
 
 
     model = models.Sequential([
@@ -275,7 +355,7 @@ def transferLearning_classweight_holdout(proc,red):
     #ENTRENAMIENTO
     model.compile(
     optimizer='adam',
-    loss='categorical_crossentropy', #binary_crossentropy
+    loss='categorical_crossentropy', 
     metrics=['accuracy'],)
 
     es = EarlyStopping(monitor='val_accuracy', mode='max', patience=20,  restore_best_weights=True)
@@ -332,7 +412,7 @@ def transferLearning_classweight_holdout(proc,red):
     flatten_layer = layers.Flatten()
     dense_layer_1 = layers.Dense(50, activation='relu')
     dense_layer_2 = layers.Dense(20, activation='relu')
-    prediction_layer = layers.Dense(2, activation='softmax') #1 / sigmoid
+    prediction_layer = layers.Dense(2, activation='softmax')
 
 
     model = models.Sequential([
@@ -351,7 +431,7 @@ def transferLearning_classweight_holdout(proc,red):
     #ENTRENAMIENTO
     model.compile(
     optimizer='adam',
-    loss='categorical_crossentropy', #binary_crossentropy
+    loss='categorical_crossentropy', 
     metrics=['accuracy'],)
 
     es = EarlyStopping(monitor='val_accuracy', mode='max', patience=20,  restore_best_weights=True)
@@ -379,6 +459,9 @@ def transferLearning_classweight_holdout(proc,red):
     
     return history
 
+'''
+Pruebas con las 12 arquitecturas de transfer learning y las imágenes sin preprocesamiento gaussiano.
+'''
 print('___________________________________________________________________________________')
 print('SIN PREPROCESAMIENTO')
 print('___________________________________________________________________________________')
@@ -386,6 +469,9 @@ print('_________________________________________________________________________
 for e in [VGG16, VGG19, Xception, ResNet50V2, ResNet101, ResNet152, InceptionV3, InceptionResNetV2, MobileNet, DenseNet121, DenseNet201, EfficientNetB0]:
     transferLearning_classweight_holdout(False,e)
 
+'''
+Pruebas con las 12 arquitecturas de transfer learning y las imágenes con preprocesamiento gaussiano.
+'''
 print('___________________________________________________________________________________')
 print('CON PREPROCESAMIENTO')
 print('___________________________________________________________________________________')
