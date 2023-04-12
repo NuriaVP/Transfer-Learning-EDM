@@ -87,12 +87,8 @@ dic_preprocesado = {VGG16:preprocess_VGG16,
                 DenseNet121:preprocess_DenseNet121,
                 DenseNet201:preprocess_DenseNet201,
                 EfficientNetB0:preprocess_EfficientNetB0,
-		InceptionV3:preprocess_InceptionV3}
-
-
-# In[4]:
-
-
+  
+                    InceptionV3:preprocess_InceptionV3}
 def combine_gen(gens):
     while True:
         tuplas = []
@@ -107,10 +103,6 @@ def combine_gen(gens):
         labels = np.concatenate(arrays_labels)
 
         yield(tuple((images,labels)))
-
-
-# In[5]:
-
 
 def num(directorio,K_test,K_val):
     total = 0
@@ -128,7 +120,7 @@ def num(directorio,K_test,K_val):
 
 def generador_train(modelo,directorio,K,origen,grado,escala):
     train_datagen = ImageDataGenerator(
-	preprocessing_function = dic_preprocesado[modelo],
+        preprocessing_function = dic_preprocesado[modelo],
         horizontal_flip=True,
         vertical_flip=True,
         zca_whitening=True,
