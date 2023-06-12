@@ -1,6 +1,8 @@
 # Transfer-Learning-EDM
 Dada la escasez de imágenes etiquetadas asociadas a la detección y clasificación del edema macula diabético, este proyecto aplica transfer learning para mejorar la precisión de estos modelos al hacer dicha clasificación.
 
+En el repositorio virtual, falta la carpeta de "Experimentación final". Sin embargo, sus archivos están sueltos en repositorio, son: TFG_CV_DAonfly.py y run_conda_env.sh
+
 Como no se pueden subir a GitHub todos los conjuntos de datos demasiado voluminosos, para entrar a las carpetas del proyecto con este tipo de datos, a continuación aparecen los enlaces de OneDrive:
 
 ## Figuras memoria:
